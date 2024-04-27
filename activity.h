@@ -10,7 +10,7 @@ private:
     string value;
 
 public:
-    Activity(int type = 0, string value = ""){};
+    Activity(int t = 0, string val = ""): type(t), value(val) {};
     ~Activity(){};
      // Getters
     int getType() {return type;};

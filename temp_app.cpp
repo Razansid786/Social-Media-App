@@ -1,14 +1,19 @@
 #ifndef SOCIALNETWORKAPP_HPP
 #define SOCIALNETWORKAPP_HPP
+#include "page.h"
+#include "post.h"
+#include "user.h"
 
 #include <iostream>
-#include "User.h"
-#include "Page.h"
-#include "Post.h"
 #include <fstream>
 #include <string>
 #include <sstream>
 using namespace std;
+
+class User;
+class Page;
+class Post;
+class Activity;
 
 class SocialNetworkApp {
 private:
@@ -31,6 +36,7 @@ public:
         posts = new Post*[maxPosts];
         initializeUsersFromFile("Users.txt");
         initializePagesFromFile("Pages.txt");
+        initializePostsFromFile("Posts.txt");
     }
     ~SocialNetworkApp(){};
     //getters
@@ -53,12 +59,44 @@ public:
             cout<<users[i]->getId()<<endl;
         } */
 
-        for (int i = 0; i < maxPages; i ++)
-        {
-            cout<<pages[i]->getId()<<endl;
-        }
+        // for (int i = 0; i < maxPages; i ++)
+        // {
+        //     cout<<pages[i]->getId()<<endl;
+        // }
+
+    //     for (int i = 0; i < maxPosts; i++)
+    //     {
+    //         cout<<"a"<<endl;
+    //         cout<<posts[i]->getId()<<endl;
+    //     }
+    //     cout<<"----------"<<endl;
+    //     for (int i = 0; i < maxPosts; i++)
+    //     {
+    //         cout<<posts[i]->getLikes();
+    //     }
+        
+    //     cout<<"----------"<<endl;   
+
+        
+    //     // for (int i = 0; i < maxPosts; i++)
+    //     // {
+    //     //     cout<<posts[i]->getLikedBy()[1]->getId()<<endl;
+    //     // }
+
+    //     for (int i = 0; i < numPosts; i++) {
+    //         User** likedBy = posts[i]->getLikedBy();
+    //         if (likedBy != nullptr && likedBy[0] != nullptr) {
+    //             cout << likedBy[0]->getId() << endl;
+    //         } else {
+    //             cout << "No users liked post " << posts[i]->getId() << endl;
+    //         }
+    // }   
+        setCurrentUser("u1");
+        likePost("post3");
+        viewLikes("post3");
 
     }
+        // Task 1
     void setCurrentUser(const string& userId)
     {
         for (int i = 0; i < maxUsers; ++i) {
@@ -71,8 +109,10 @@ public:
         currentUser = nullptr;
     }
 
+        // Task 2
     void viewHome(){};
 
+        //Task 3
     void likePost(const string& postId){
             // Check if the currentUser is valid
         if (currentUser == nullptr) {
@@ -111,11 +151,41 @@ public:
 
         // Like the post
         postToLike->addLike(currentUser);
-        cout << "Post liked successfully." << endl;
+        //cout << "Post liked successfully." << endl;
     }
-            
-    void viewLikes(const string& postId){};
-    void commentOnPost(const string& postId, const string& commentText){};
+            // Task 5
+    
+        Post* findPostById(const string& postId) {
+        for (int i = 0; i < maxPosts; ++i) {
+            if (posts[i]->getId() == postId) {
+                return posts[i];
+            }
+        }
+        return nullptr; // Post not found
+    }
+    void viewLikes(const string& postId) {
+            // Search for the post with the given Post ID
+        Post* post = findPostById(postId);
+        if (post != nullptr) {
+            User** likedBy = post->getLikedBy();
+            int numLikedBy = post->getCurrLikedBy();
+
+            // Check if any users have liked the post
+            if (numLikedBy > 0) {
+                cout << "List of people who liked the post:" << endl;
+                for (int i = 0; i < numLikedBy; ++i) {
+                    cout << likedBy[i]->getName() << endl;
+                }
+            } else {
+                cout << "No users have liked the post." << endl;
+            }
+        } else {
+            cout << "Post with ID " << postId << " not found." << endl;
+        }
+    };
+    void commentOnPost(const string& postId, const string& commentText){
+        
+    };
     void viewPost(const string& postId){};
     void shareMemory(const string& postId, const string& memoryText){};
     void viewUserTimeline(const string& userId){};
@@ -144,8 +214,11 @@ public:
         string line;
         while (getline(file, line)) {
             istringstream iss(line);
-            string userId, userName;
-            iss >> userId >> userName;
+            string userId, firstName, lastName;
+            iss >> userId >> firstName >> lastName;
+
+        // Combine the first name and last name into the full name
+        string userName = firstName + " " + lastName;
 
             // Create a new User object
             User* newUser = new User(userId, userName);
@@ -179,7 +252,7 @@ void addPage(Page* newPage) {
     if (numPages < maxPages) {
         // Add the new page to the array
         pages[numPages++] = newPage;
-        cout << "Page added: " << newPage->getId() << " - " << newPage->getTitle() << endl; // Debugging output
+        //cout << "Page added: " << newPage->getId() << " - " << newPage->getTitle() << endl; // Debugging output
     } else {
         // Handle the case where the array is full
         cout << "Error: Maximum number of pages reached. Page not added: " << newPage->getId() << endl;
@@ -229,8 +302,210 @@ void initializePagesFromFile(const string& filename) {
 }
 
         //File handeling for Posts
+/* 
+// void initializePostsFromFile(const string& filename, Post** posts, int& numPosts, const int maxPosts, User** users, const int numUsers, Page** pages, const int numPages) {
+//     ifstream file(filename);
+//     if (!file.is_open()) {
+//         cout << "Error: Unable to open file " << filename << endl;
+//         return;
+//     }
 
-void initializePostsFromFile(const string& filename, Post** posts, int& numPosts, const int maxPosts, User** users, const int numUsers, Page** pages, const int numPages) {
+//     string line;
+//     while (getline(file, line)) {
+//         // Skip empty lines
+//         if (line.empty()) {
+//             continue;
+//         }
+
+//         // Parse post data
+//         string postId, description, activityTypeStr, activityValue, ownerId;
+//         int day, month, year, activityType;
+        
+//         istringstream iss(line);
+//         iss >> postId >> day >> month >> year;
+//         getline(file, description);
+//         getline(file, line);
+//         istringstream activityStream(line);
+//         activityStream >> activityTypeStr >> ws;
+//         getline(activityStream, activityValue);
+//         activityType = stoi(activityTypeStr);
+//         getline(file, ownerId);
+
+//         // Create a new Post object
+//         Post* newPost = new Post(postId, description, day, month, year);
+//         newPost->addActivity(activityType, activityValue);
+
+//         // Determine owner (user or page) and set it
+//         bool isPageOwner = false;
+//         for (int i = 0; i < numUsers; ++i) {
+//             if (users[i]->getId() == ownerId) {
+//                 newPost->setOwner(users[i]);
+//                 break;
+//             }
+//         }
+//         if (!newPost->getOwner()) {
+//             for (int i = 0; i < numPages; ++i) {
+//                 if (pages[i]->getId() == ownerId) {
+//                     newPost->setOwner(pages[i]);
+//                     isPageOwner = true;
+//                     break;
+//                 }
+//             }
+//         }
+//         newPost->setIsPageOwner(isPageOwner);
+
+//         // Read liked users/pages
+//         while (getline(file, line)) {
+//             if (line == "-1") {
+//                 break; // End of liked users/pages
+//             }
+//             if (isPageOwner) {
+//                 // Assuming the line contains the ID of the user who liked the post
+//                 for (int i = 0; i < numUsers; ++i) {
+//                     if (users[i]->getId() == line) {
+//                         newPost->addLikedBy(users[i]);
+//                         break;
+//                     }
+//                 }
+//             } else {
+//                 // Assuming the line contains the ID of the page that liked the post
+//                 for (int i = 0; i < numPages; ++i) {
+//                     if (pages[i]->getId() == line) {
+//                         newPost->addLikedBy(pages[i]);
+//                         break;
+//                     }
+//                 }
+//             }
+//         }
+
+//         // Add the new post to the posts array
+//         if (numPosts < maxPosts) {
+//             posts[numPosts++] = newPost;
+//         } else {
+//             cout << "Warning: Maximum number of posts reached. Some posts may not be added." << endl;
+//             delete newPost; // Free memory to prevent memory leaks
+//         }
+//     }
+
+//     file.close();
+// }
+ */
+/* 
+//     void initializePostsFromFile(const string& filename, Post** posts, int& numPosts, const int maxPosts, User** users, const int numUsers, Page** pages, const int numPages) {
+//         ifstream file(filename);
+//         if (!file.is_open()) {
+//             cout << "Error: Unable to open file " << filename << endl;
+//             return;
+//         }
+
+//         string line;
+//         while (getline(file, line)) {
+//             // Skip empty lines
+//             if (line.empty()) {
+//                 continue;
+//             }
+
+//         // Parse post data
+//         string postId, description, activityTypeStr, activityValue, ownerId;
+//         int day, month, year, activityType;
+        
+//         istringstream iss(line);
+//         iss >> postId >> day >> month >> year;
+//         getline(file, description);
+//         getline(file, line);
+//         istringstream activityStream(line);
+//         activityStream >> activityTypeStr >> ws;
+//         getline(activityStream, activityValue);
+//         activityType = stoi(activityTypeStr);
+//         getline(file, ownerId);
+
+//         // Create a new Post object
+//         Post* newPost = new Post(postId, description, day, month, year);
+//         newPost->addActivity(activityType, activityValue);
+
+//         // Add the new post to the posts array
+//         if (numPosts < maxPosts) {
+//             posts[numPosts++] = newPost;
+//         } else {
+//             cout << "Warning: Maximum number of posts reached. Some posts may not be added." << endl;
+//             delete newPost; // Free memory to prevent memory leaks
+//         }
+
+//         // Add the post to the owner's posts array
+//         newPost->addPostToOwner(users, numUsers, pages, numPages);
+//     }
+
+//     file.close();
+// }
+ */
+ /* 
+    // void initializePostsFromFile(const string& filename) {
+    //     ifstream file(filename);
+    //     if (!file.is_open()) {
+    //         cout << "Error: Unable to open file " << filename << endl;
+    //         return;
+    //     }
+
+    //     string line;
+    //     while (getline(file, line)) {
+    //         // Skip empty lines
+    //         if (line.empty()) {
+    //             continue;
+    //         }
+
+    //         // Parse post data
+    //         string postId, description, activityTypeStr, activityValue, ownerId;
+    //         int day, month, year, activityType;
+
+    //         istringstream iss(line);
+    //         iss >> postId >> day >> month >> year;
+    //         cout<<postId<<"--"<<day<<"--"<<month<<"--"<<year<<endl;
+    //         getline(file, description);
+    //         cout<<description<<endl;
+    //         getline(file, line);
+    //         cout<<line<<endl;
+    //         istringstream activityStream(line);
+    //         activityStream >> activityTypeStr >> ws;
+    //         getline(activityStream, activityValue);
+    //         activityType = stoi(activityTypeStr);
+    //         getline(file, ownerId);
+    //         cout<<ownerId;
+
+    //         // Create a new Post object
+    //         Post* newPost = new Post(postId, description, day, month, year);
+    //         newPost->addActivity(activityType, activityValue);
+
+    //         // Find the owner based on the ownerId and add the post to the owner
+    //         for (int i = 0; i < numPages; ++i) {
+    //             if (pages[i] && pages[i]->getId() == ownerId) {
+    //                 // Add the post to the page
+    //                 pages[i]->addPost(newPost);
+    //                 break; // Exit the loop after adding the post
+    //             }
+    //         }
+    //         // If owner is not found among pages, search among users
+    //         for (int i = 0; i < numUsers; ++i) {
+    //             if (users[i] && users[i]->getId() == ownerId) {
+    //                 // Add the post to the user
+    //                 users[i]->addPost(newPost);
+    //                 break; // Exit the loop after adding the post
+    //             }
+    //         }
+
+    //         // Add the new post to the posts array
+    //         if (numPosts < maxPosts) {
+    //             posts[numPosts++] = newPost;
+    //         } else {
+    //             cout << "Warning: Maximum number of posts reached. Some posts may not be added." << endl;
+    //             delete newPost; // Free memory to prevent memory leaks
+    //         }
+    //     }
+
+    //     file.close();
+    // }
+ */
+/*    
+    void initializePostsFromFile(const string& filename) {
     ifstream file(filename);
     if (!file.is_open()) {
         cout << "Error: Unable to open file " << filename << endl;
@@ -239,69 +514,60 @@ void initializePostsFromFile(const string& filename, Post** posts, int& numPosts
 
     string line;
     while (getline(file, line)) {
-        // Skip empty lines
-        if (line.empty()) {
+        // Skip empty lines and the line indicating end of post
+        if (line.empty() || line == "-1") {
             continue;
         }
 
         // Parse post data
         string postId, description, activityTypeStr, activityValue, ownerId;
         int day, month, year, activityType;
-        
-        istringstream iss(line);
-        iss >> postId >> day >> month >> year;
+
+        // Post ID
+        postId = line;
+        getline(file, line); // Read next line (Day, Month, Year)
+        istringstream dateStream(line);
+        dateStream >> day >> month >> year;
+
+        // Description
         getline(file, description);
-        getline(file, line);
-        istringstream activityStream(line);
-        activityStream >> activityTypeStr >> ws;
-        getline(activityStream, activityValue);
+
+        // Activity Type and Value
+            getline(file, line);
+    istringstream activityStream(line);
+    activityStream >> activityTypeStr >> activityValue;
+
+    // Check if activityTypeStr is empty before converting it to an integer
+    if (!activityTypeStr.empty()) {
         activityType = stoi(activityTypeStr);
+    } else {
+        // Handle the case where activityTypeStr is empty
+        continue; // Skip to the next iteration of the loop
+    }
+
+        // Owner ID
         getline(file, ownerId);
+
 
         // Create a new Post object
         Post* newPost = new Post(postId, description, day, month, year);
         newPost->addActivity(activityType, activityValue);
 
-        // Determine owner (user or page) and set it
-        bool isPageOwner = false;
-        for (int i = 0; i < numUsers; ++i) {
-            if (users[i]->getId() == ownerId) {
-                newPost->setOwner(users[i]);
-                break;
+        // Find the owner based on the ownerId and add the post to the owner
+        for (int i = 0; i < numPages; ++i) {
+            if (pages[i] && pages[i]->getId() == ownerId) {
+                // Add the post to the page
+                pages[i]->addPost(newPost);
+                break; // Exit the loop after adding the post
             }
         }
-        if (!newPost->getOwner()) {
-            for (int i = 0; i < numPages; ++i) {
-                if (pages[i]->getId() == ownerId) {
-                    newPost->setOwner(pages[i]);
-                    isPageOwner = true;
-                    break;
-                }
-            }
-        }
-        newPost->setIsPageOwner(isPageOwner);
+        // If owner is not found among pages, search among users
 
-        // Read liked users/pages
-        while (getline(file, line)) {
-            if (line == "-1") {
-                break; // End of liked users/pages
-            }
-            if (isPageOwner) {
-                // Assuming the line contains the ID of the user who liked the post
-                for (int i = 0; i < numUsers; ++i) {
-                    if (users[i]->getId() == line) {
-                        newPost->addLikedBy(users[i]);
-                        break;
-                    }
-                }
-            } else {
-                // Assuming the line contains the ID of the page that liked the post
-                for (int i = 0; i < numPages; ++i) {
-                    if (pages[i]->getId() == line) {
-                        newPost->addLikedBy(pages[i]);
-                        break;
-                    }
-                }
+        for (int i = 0; i < numUsers; ++i) {
+            if (users[i] && users[i]->getId() == ownerId) {
+                // Add the post to the user
+                users[i]->addPost(newPost);
+                break; // Exit the loop after adding the post
             }
         }
 
@@ -316,8 +582,98 @@ void initializePostsFromFile(const string& filename, Post** posts, int& numPosts
 
     file.close();
 }
+ */
 
+    void initializePostsFromFile(const string& filename) {
+        ifstream file(filename);
+        if (!file.is_open()) {
+            cout << "Error: Unable to open file " << filename << endl;
+            return;
+        }
 
+        string line;
+        while (getline(file, line)) {
+            // Skip empty lines and the line indicating end of post
+            if (line.empty() || line == "-1") {
+                continue;
+            }
+
+            // Parse post data
+            string postId, description, activityTypeStr, activityValue, ownerId;
+            int day, month, year, activityType;
+
+            // Post ID
+            postId = line;
+            getline(file, line); // Read next line (Day, Month, Year)
+            istringstream dateStream(line);
+            dateStream >> day >> month >> year;
+
+            // Description
+            getline(file, description);
+
+            // Activity Type and Value
+            getline(file, line);
+            istringstream activityStream(line);
+            activityStream >> activityTypeStr >> activityValue;
+
+            // Check if activityTypeStr is empty before converting it to an integer
+            if (!activityTypeStr.empty()) {
+                activityType = stoi(activityTypeStr);
+            } else {
+                // Handle the case where activityTypeStr is empty
+                continue; // Skip to the next iteration of the loop
+            }
+
+            // Owner ID
+            getline(file, ownerId);
+            // Create a new Post object
+            Post* newPost = new Post(postId, description, day, month, year);
+            newPost->addActivity(activityType, activityValue);
+
+            // Find the owner based on the ownerId and add the post to the owner
+            for (int i = 0; i < numPages; ++i) {
+                if (pages[i] && pages[i]->getId() == ownerId) {
+                    // Add the post to the page
+                    pages[i]->addPost(newPost);
+                    break; // Exit the loop after adding the post
+                }
+            }
+            // If owner is not found among pages, search among users
+
+            for (int i = 0; i < numUsers; ++i) {
+                if (users[i] && users[i]->getId() == ownerId) {
+                    // Add the post to the user
+                    users[i]->addPost(newPost);
+                    break; // Exit the loop after adding the post
+                }
+            }
+
+            // Add the new post to the posts array
+            if (numPosts < maxPosts) {
+                posts[numPosts++] = newPost;
+            } else {
+                cout << "Warning: Maximum number of posts reached. Some posts may not be added." << endl;
+                delete newPost; // Free memory to prevent memory leaks
+            }
+
+            // Read the line containing user IDs who liked the post
+            getline(file, line);
+            if (line == "0") {
+                newPost->setLikedBy(nullptr);
+                continue; // Skip to the next iteration of the loop
+            }
+            istringstream likedByStream(line);
+            string likedById;
+            while (likedByStream >> likedById) {
+                // Set the current user using the likedById
+                setCurrentUser(likedById);
+                // Like the post using the postId
+                likePost(postId);
+            }
+
+        }
+        file.close();
+    }
 };
 
 #endif /* SOCIALNETWORKAPP_HPP */
