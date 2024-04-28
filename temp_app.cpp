@@ -3,17 +3,22 @@
 #include "page.h"
 #include "post.h"
 #include "user.h"
+#include "comment.h"
+#include "date.h"
 
 #include <iostream>
 #include <fstream>
 #include <string>
 #include <sstream>
+#include <algorithm>
 using namespace std;
 
 class User;
 class Page;
 class Post;
 class Activity;
+class comment;
+class Date;
 
 class SocialNetworkApp {
 private:
@@ -27,10 +32,12 @@ private:
     int numUsers;
     int numPosts;
     int numPages;
+    Date currentDate;
 
 public:
     SocialNetworkApp(int maxUsers = 20, int maxPages = 12, int maxPosts = 12)
         : currentUser(nullptr), maxUsers(maxUsers), maxPages(maxPages), maxPosts(maxPosts), numUsers(0), numPosts(0), numPages(0) {
+        setDate(1,1,2000);
         users = new User*[maxUsers];
         pages = new Page*[maxPages];
         posts = new Post*[maxPosts];
@@ -94,8 +101,31 @@ public:
         setCurrentUser("u1");
         likePost("post3");
         viewLikes("post3");
+        commentOnPost("post1","what is this");
+        setCurrentUser("u2");
+        commentOnPost("post1", "how would i know?");
+        viewPost("post1");
+        shareMemory("post2", "Messed up the project");
+        cout<<endl<<endl;
+        setCurrentUser("u3");
+        Post* tempPost = findPostById("post2");
+        cout<<endl<<endl;
+        if (tempPost)
+            cout<<"owner: "<<tempPost->getOwnerId()<<endl;
+        else
+            cout<<"shit";
+        cout<<"Descriprtion: "<<tempPost->getDescription()<<endl<<endl;
+        viewUserTimeline();
 
     }
+
+    // setters
+    void setDate(int d, int m , int y){
+        currentDate.setDay(d);
+        currentDate.setMonth(m);
+        currentDate.setYear(y);
+    }
+
         // Task 1
     void setCurrentUser(const string& userId)
     {
@@ -153,9 +183,9 @@ public:
         postToLike->addLike(currentUser);
         //cout << "Post liked successfully." << endl;
     }
-            // Task 5
+            // Task 4
     
-        Post* findPostById(const string& postId) {
+    Post* findPostById(const string& postId) {
         for (int i = 0; i < maxPosts; ++i) {
             if (posts[i]->getId() == postId) {
                 return posts[i];
@@ -183,12 +213,124 @@ public:
             cout << "Post with ID " << postId << " not found." << endl;
         }
     };
-    void commentOnPost(const string& postId, const string& commentText){
-        
+
+            //Task 5
+
+    void commentOnPost(const string& postId, const string& commentText) {
+        // Find the post with the given postId
+        Post* targetPost = nullptr;
+        for (int i = 0; i < numPosts; ++i) {
+            if (posts[i]->getId() == postId) {
+                targetPost = posts[i];
+                break;
+            }
+        }
+
+        // If the post is found, proceed to add the comment
+        if (targetPost) {
+            // Create a new Comment object
+            Comment* newComment = new Comment(commentText, currentUser, targetPost);
+
+            // Add the comment to the post
+            targetPost->addComment(newComment);
+
+            // Add the comment to the user who posted it
+            currentUser->addComment(newComment);
+
+            // cout << "Comment added successfully!" << endl;
+        } else {
+            cout << "Error: Post not found with ID " << postId << endl;
+        }
+    }
+
+    void viewPost(const string& postId){
+        // Retrieve the post by its ID
+        Post* post = findPostById(postId);
+
+        //check if the post exists
+        if (post) {
+        // Display post details
+        cout << "Post ID: " << post->getId() << endl;
+        cout << "Description: " << post->getDescription() << endl;
+        cout << "Likes: " << post->getLikes() << endl;
+
+        // Display activities
+        cout << "Activity: ";
+        pair<int, string>* activity = post->getActivities();
+        if (activity) {
+            cout << activity->second << endl;
+        } else {
+            cout << "No activity." << endl;
+        }
+
+        // Display comments
+        cout << "Comments:" << endl;
+        Comment** comments = post->getComments();
+        int numComments = post->getCurrComments();
+        for (int i = 0; i < numComments; ++i) {
+            Comment* comment = comments[i];
+            if (comment) {
+                cout << comment->getCommentOwner()->getName() <<": ";
+                cout << comment->getComment() << endl;
+                cout << "----------------------------------" << endl;
+            }
+        }
+    } else {
+        // Handle the case where the post with the given ID does not exist
+        cout << "Post with ID " << postId << " does not exist." << endl;
+    }
+
     };
-    void viewPost(const string& postId){};
-    void shareMemory(const string& postId, const string& memoryText){};
-    void viewUserTimeline(const string& userId){};
+
+        //          Task 7
+        
+    void shareMemory(const string& postId, const string& text) {
+        // Find the post by ID
+        Post* post = findPostById(postId);
+        
+        // Check if the post exists
+        if (post) {
+            // Change the description of the post
+            post->setDescription(text);
+            
+            // Call viewPost function to display the updated post
+            viewPost(postId);
+        } else {
+            cout << "Post with ID " << postId << " not found." << endl;
+        }
+    }   
+
+        //      Task 8
+
+    void viewUserTimeline(){
+            // Check if currentUser is set
+        if (currentUser) {
+            // Display user's name
+            cout << "User Name: " << currentUser->getName() << endl;
+            
+            // Display user's posts
+            Post** tempPosts = currentUser->getPosts();
+            int numPosts = currentUser->getCurrPosts();
+            cout<<"NumPost: "<<numPosts<<endl;
+            if (numPosts != 0)
+            {
+                cout << "User's Posts:" << endl;
+                for (int i = 0; i < numPosts; ++i) {
+                    cout << "Post ID: " << tempPosts[i]->getId() << endl;
+                    cout << "Description: " << tempPosts[i]->getDescription() << endl;
+                    cout << "Likes: " << tempPosts[i]->getLikes() << endl;
+                    cout << "Date: " << tempPosts[i]->getDate().getDay() << "/" << posts[i]->getDate().getMonth() << "/" << posts[i]->getDate().getYear() << endl;
+                    cout << "-----------------------" << endl;
+                }
+            }
+            else{
+                cout<<"\tNo Posts Found!!\n\n";
+            }
+            
+        } else {
+            cout << "No user is logged in." << endl;
+        }
+    };
     void viewFriendList(const string& userId){};
     void viewPage(const string& pageId){};
 
@@ -602,7 +744,12 @@ void initializePagesFromFile(const string& filename) {
             string postId, description, activityTypeStr, activityValue, ownerId;
             int day, month, year, activityType;
 
-            // Post ID
+            line = line.substr(0, line.find_first_of('\r')); // Remove any carriage return characters
+            size_t found = line.find_last_not_of(" \t"); // Find the index of the last non-whitespace character
+            if (found != string::npos) {
+                line = line.substr(0, found + 1); // Remove trailing whitespace characters
+            }
+
             postId = line;
             getline(file, line); // Read next line (Day, Month, Year)
             istringstream dateStream(line);
@@ -623,11 +770,10 @@ void initializePagesFromFile(const string& filename) {
                 // Handle the case where activityTypeStr is empty
                 continue; // Skip to the next iteration of the loop
             }
-
             // Owner ID
             getline(file, ownerId);
             // Create a new Post object
-            Post* newPost = new Post(postId, description, day, month, year);
+            Post* newPost = new Post(postId, description, day, month, year,ownerId);
             newPost->addActivity(activityType, activityValue);
 
             // Find the owner based on the ownerId and add the post to the owner
@@ -650,7 +796,10 @@ void initializePagesFromFile(const string& filename) {
 
             // Add the new post to the posts array
             if (numPosts < maxPosts) {
+                cout<<newPost->getId()<<" "<<newPost->getOwnerId()<<endl;
                 posts[numPosts++] = newPost;
+                int temp = numPosts - 1;
+                cout<<posts[temp]->getOwnerId()<<endl;
             } else {
                 cout << "Warning: Maximum number of posts reached. Some posts may not be added." << endl;
                 delete newPost; // Free memory to prevent memory leaks

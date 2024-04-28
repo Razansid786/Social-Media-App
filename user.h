@@ -245,6 +245,8 @@ public:
     // Getters
     string getName() const { return name; }
     string getId() const { return id; }
+    Post** getPosts() {return posts;}
+    int getCurrPosts() {return currPosts;}
 
     // Add a friend to the user
     void addFriend(const string& friendId) {
