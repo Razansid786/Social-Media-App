@@ -21,7 +21,7 @@ public:
         : comment(c), commentOwner(owner), commentPost(post) {}
 
     // Getters
-    std::string getComment() const { return comment; }
+    string getComment() const { return comment; }
     User* getCommentOwner() const { return commentOwner; }
     Post* getCommentPost() const { return commentPost; }
 

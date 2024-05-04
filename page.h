@@ -30,7 +30,9 @@ public:
     ~Page(){};
     // getters
     string getId() {return id;};
-    string getTitle() {return title;};
+    string getTitle() {return title;}
+    Post** getPosts() {return posts;}
+    int getCurrPosts() {return currPosts;}
     // Declare other methods
     void addPost(Post* post) {
         if (currPosts < maxPosts) {

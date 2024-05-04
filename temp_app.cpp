@@ -44,6 +44,7 @@ public:
         initializeUsersFromFile("Users.txt");
         initializePagesFromFile("Pages.txt");
         initializePostsFromFile("Posts.txt");
+        readCommentsFromFile("Comments.txt");
     }
     ~SocialNetworkApp(){};
     //getters
@@ -116,6 +117,17 @@ public:
             cout<<"shit";
         cout<<"Descriprtion: "<<tempPost->getDescription()<<endl<<endl;
         viewUserTimeline();
+        cout<<"-----------------------"<<endl;
+        viewFriendList(currentUser->getId());
+        cout<<"-----------------------"<<endl;
+        viewPage("p1");
+        cout<<"-----------------------"<<endl;
+        viewPost("post1");
+        setCurrentUser("u1");
+        setDate(15,11,2017);
+        viewHome();
+
+
 
     }
 
@@ -126,7 +138,98 @@ public:
         currentDate.setYear(y);
     }
 
+
+        // Function to find a user by their ID
+    User* findUserById(const string& userId) {
+        for (int i = 0; i < numUsers; ++i) {
+            if (users[i]->getId() == userId) {
+                return users[i];
+            }
+        }
+        return nullptr; // User not found
+    }
+
+        //Function to find a page by id
+    Page* findPageById(const string& pageId) {
+    for (int i = 0; i < numPages; ++i) {
+        if (pages[i]->getId() == pageId) {
+            return pages[i];
+        }
+    }
+    return nullptr; // Return nullptr if page with given ID is not found
+}
+
+        //Function to find a post by its Id
+    Post* findPostById(const string& postId) {
+        for (int i = 0; i < maxPosts; ++i) {
+            if (posts[i]->getId() == postId) {
+                return posts[i];
+            }
+        }
+        return nullptr; // Post not found
+    }
+
+        // Function to view posts of friends shared in the last 24 hours
+    void viewPostsOfFriendsInLast24Hours() {
+        std::string* friendIds = currentUser->getFriends(); // Get array of friend IDs
+        int numFriends = currentUser->getCurrFriends(); // Get the number of friends
+
+        for (int i = 0; i < numFriends; ++i) {
+            User* friendUser = findUserById(friendIds[i]); // Find the friend user by ID
+            if (friendUser) { // Check if the friend user exists
+                std::cout << "Posts from " << friendUser->getName() << ":" << std::endl;
+                Post** posts = friendUser->getPosts(); // Get array of posts of the friend user
+                int numPosts = friendUser->getCurrPosts(); // Get the number of posts
+                for (int j = 0; j < numPosts; ++j) {
+                    Post* post = posts[j]; // Get the post at index j
+                    if (isPostSharedInLast24Hours(post)) {
+                        // std::cout << post->getDescription() << std::endl;
+                        viewPost(post->getId());
+
+                    }
+                }
+            } else {
+                std::cout << "Error: Friend with ID " << friendIds[i] << " not found." << std::endl;
+            }
+        }
+    }
+
+    // Function to view posts of liked pages shared in the last 24 hours
+    void viewPostsOfLikedPagesInLast24Hours() {
+        std::string* likedPageIds = currentUser->getLikedPages(); // Get array of liked page IDs
+        int numLikedPages = currentUser->getCurrLikedPages(); // Get the number of liked pages
+
+        for (int i = 0; i < numLikedPages; ++i) {
+            Page* likedPage = findPageById(likedPageIds[i]); // Get the liked page by ID
+            if (likedPage) { // Check if the liked page exists
+                std::cout << "Posts from " << likedPage->getTitle() << ":" << std::endl;
+                Post** posts = likedPage->getPosts(); // Get array of posts of the liked page
+                int numPosts = likedPage->getCurrPosts(); // Get the number of posts
+                for (int j = 0; j < numPosts; ++j) {
+                    Post* post = posts[j]; // Get the post at index j
+                    if (isPostSharedInLast24Hours(post)) {
+                        // std::cout << post->getDescription() << std::endl;
+                        viewPost(post->getId());
+                    }
+                }
+            } else {
+                std::cout << "Error: Liked page with ID " << likedPageIds[i] << " not found." << std::endl;
+            }
+        }
+    }
+    // Function to check if a post is shared in the last 24 hours
+    bool isPostSharedInLast24Hours(Post* post) {
+        // Date currentDate = currentUser->getCurrentDate();
+        Date postDate = post->getDate();
+        
+        // Calculate the difference in days between post date and current date
+        int daysDifference = currentDate.calculateDaysDifference(postDate);
+
+        return daysDifference <= 1;
+    }
+
         // Task 1
+
     void setCurrentUser(const string& userId)
     {
         for (int i = 0; i < maxUsers; ++i) {
@@ -140,7 +243,16 @@ public:
     }
 
         // Task 2
-    void viewHome(){};
+
+    void viewHome(){
+        std::cout << "Posts from friends shared in last 24 hours:" << std::endl;
+        viewPostsOfFriendsInLast24Hours();
+
+        std::cout << "\nPosts from liked pages shared in last 24 hours:" << std::endl;
+        viewPostsOfLikedPagesInLast24Hours();
+    }
+
+    
 
         //Task 3
     void likePost(const string& postId){
@@ -184,15 +296,7 @@ public:
         //cout << "Post liked successfully." << endl;
     }
             // Task 4
-    
-    Post* findPostById(const string& postId) {
-        for (int i = 0; i < maxPosts; ++i) {
-            if (posts[i]->getId() == postId) {
-                return posts[i];
-            }
-        }
-        return nullptr; // Post not found
-    }
+
     void viewLikes(const string& postId) {
             // Search for the post with the given Post ID
         Post* post = findPostById(postId);
@@ -218,13 +322,13 @@ public:
 
     void commentOnPost(const string& postId, const string& commentText) {
         // Find the post with the given postId
-        Post* targetPost = nullptr;
-        for (int i = 0; i < numPosts; ++i) {
-            if (posts[i]->getId() == postId) {
-                targetPost = posts[i];
-                break;
-            }
-        }
+        Post* targetPost = findPostById(postId);
+        // for (int i = 0; i < numPosts; ++i) {
+        //     if (posts[i]->getId() == postId) {
+        //         targetPost = posts[i];
+        //         break;
+        //     }
+        // }
 
         // If the post is found, proceed to add the comment
         if (targetPost) {
@@ -242,6 +346,8 @@ public:
             cout << "Error: Post not found with ID " << postId << endl;
         }
     }
+
+        // Task 6
 
     void viewPost(const string& postId){
         // Retrieve the post by its ID
@@ -331,8 +437,62 @@ public:
             cout << "No user is logged in." << endl;
         }
     };
-    void viewFriendList(const string& userId){};
-    void viewPage(const string& pageId){};
+
+        //Task 9
+
+    void viewFriendList(const string& userId){
+        // Find the user with the given userId
+    User* user = findUserById(userId);
+
+        // If the user is found, display their list of friends
+        if (user) {
+            cout << "Friend List for User " << user->getName() << ":" << endl;
+            string* friendIds = user->getFriends();
+            int numFriends = user->getCurrFriends();
+            for (int i = 0; i < numFriends; ++i) {
+                // Find the friend with the current friendId
+                User* friendUser = findUserById(friendIds[i]);
+                if (friendUser) {
+                    cout << "- " << friendUser->getName() << endl;
+                }
+            }
+        } else {
+            cout << "User with ID " << userId << " not found." << endl;
+        }
+
+    };
+
+        //Task 10
+
+    void viewPage(const string& pageId) {
+            // Find the page with the given pageId
+        Page* page = findPageById(pageId);
+
+    // If the page is found, display its posts
+    if (page) {
+        cout << "Posts on Page " << page->getTitle() << ":" << endl<<endl;
+        Post** posts = page->getPosts();
+        int numPosts = page->getCurrPosts();
+        for (int i = 0; i < numPosts; ++i) {
+            cout << "Post ID: " << posts[i]->getId() << endl;
+            cout << "Description: " << posts[i]->getDescription() << endl;
+            cout << "Date: " << posts[i]->getDate().getDay() << "-" << posts[i]->getDate().getMonth() << "-" << posts[i]->getDate().getYear() << endl;
+
+            // Display activity if available
+            pair<int, string>* activities = posts[i]->getActivities();
+            // int numActivities = posts[i]->getCurrActivities();
+            if (activities) {
+                cout << "Activity: " << activities[0].second << endl;
+            } else {
+                cout << "No activity" << endl;
+            }
+
+            cout << endl; // Add a blank line for separation
+        }
+    } else {
+        cout << "Page with ID " << pageId << " not found." << endl;
+    }
+    };
 
             // File handeling for user
     void addUser(User* newUser) {
@@ -759,9 +919,16 @@ void initializePagesFromFile(const string& filename) {
             getline(file, description);
 
             // Activity Type and Value
+            // getline(file, line);
+            // istringstream activityStream(line);
+            // activityStream >> activityTypeStr >> activityValue;
+
+            // Activity Type and Value
             getline(file, line);
             istringstream activityStream(line);
-            activityStream >> activityTypeStr >> activityValue;
+            activityStream >> activityTypeStr;
+            getline(activityStream, activityValue); // Read the entire line as the activity value
+
 
             // Check if activityTypeStr is empty before converting it to an integer
             if (!activityTypeStr.empty()) {
@@ -796,10 +963,10 @@ void initializePagesFromFile(const string& filename) {
 
             // Add the new post to the posts array
             if (numPosts < maxPosts) {
-                cout<<newPost->getId()<<" "<<newPost->getOwnerId()<<endl;
+                // cout<<newPost->getId()<<" "<<newPost->getOwnerId()<<endl;
                 posts[numPosts++] = newPost;
                 int temp = numPosts - 1;
-                cout<<posts[temp]->getOwnerId()<<endl;
+                // cout<<posts[temp]->getOwnerId()<<endl;
             } else {
                 cout << "Warning: Maximum number of posts reached. Some posts may not be added." << endl;
                 delete newPost; // Free memory to prevent memory leaks
@@ -823,6 +990,49 @@ void initializePagesFromFile(const string& filename) {
         }
         file.close();
     }
+
+    // Function to read comments from file and store them in the posts
+    void readCommentsFromFile(const std::string& filename) {
+        std::ifstream file(filename);
+        if (!file.is_open()) {
+            std::cout << "Error: Unable to open file " << filename << std::endl;
+            return;
+        }
+
+        std::string line;
+        while (std::getline(file, line)) {
+            std::istringstream iss(line);
+            std::string postId, userId, commentText;
+            if (!(iss >> postId >> userId)) {
+                std::cerr << "Error reading file: " << filename << std::endl;
+                continue;
+            }
+            std::getline(iss, commentText);
+
+            // Find the post
+            Post* post = findPostById(postId);
+            if (!post) {
+                std::cerr << "Post with ID " << postId << " not found." << std::endl;
+                continue;
+            }
+
+            // Find the user
+            User* user = findUserById(userId);
+            if (!user) {
+                std::cerr << "User with ID " << userId << " not found." << std::endl;
+                continue;
+            }
+
+            // Create a new Comment object
+            Comment* comment = new Comment(commentText,user,post);
+
+            // Add the comment to the post
+            post->addComment(comment);
+        }
+
+        file.close();
+    }
+
 };
 
 #endif /* SOCIALNETWORKAPP_HPP */

@@ -247,6 +247,10 @@ public:
     string getId() const { return id; }
     Post** getPosts() {return posts;}
     int getCurrPosts() {return currPosts;}
+    int getCurrFriends() {return currFriends;}
+    string* getFriends() {return friends;}
+    string* getLikedPages() {return likedPages;}
+    int getCurrLikedPages() {return currLikedPages;}
 
     // Add a friend to the user
     void addFriend(const string& friendId) {
