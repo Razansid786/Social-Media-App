@@ -22,9 +22,9 @@ private:
 
 public:
     Page(string id = "", User* owner = nullptr, string title = "") : id(id), owner(owner), title(title), maxPosts(100), currPosts(0), likes(0) {
-        posts = new Post*[maxPosts]; // Allocate memory for the posts array
+        posts = new Post*[maxPosts]; 
         for (int i = 0; i < maxPosts; ++i) {
-            posts[i] = nullptr; // Initialize each element to nullptr
+            posts[i] = nullptr; 
         }
     }
     ~Page(){};
@@ -33,7 +33,7 @@ public:
     string getTitle() {return title;}
     Post** getPosts() {return posts;}
     int getCurrPosts() {return currPosts;}
-    // Declare other methods
+
     void addPost(Post* post) {
         if (currPosts < maxPosts) {
             posts[currPosts++] = post;

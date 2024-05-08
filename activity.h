@@ -12,13 +12,12 @@ private:
 public:
     Activity(int t = 0, string val = ""): type(t), value(val) {};
     ~Activity(){};
+
      // Getters
+     
     int getType() {return type;};
     string getValue() {return value;};
-
-    //setters
     
-    // Declare other methods
 };
 
 #endif /* ACTIVITY_HPP */

@@ -9,7 +9,6 @@ private:
     int year;
 
 public:
-    // Constructor
     Date(int d = 1, int m = 1, int y = 2000) : day(d), month(m), year(y) {}
 
     // Getters
@@ -22,37 +21,29 @@ public:
     void setMonth(int m) { month = m; }
     void setYear(int y) { year = y; }
 
-    // other functions
     int calculateDaysDifference(const Date& otherDate) const {
         int daysInMonth[] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
 
         int daysDifference = 0;
 
         if (year == otherDate.getYear()) {
-            // Same year
             if (month == otherDate.getMonth()) {
-                // Same month
                 daysDifference = otherDate.getDay() - day;
             } else {
-                // Different months within the same year
-                daysDifference += daysInMonth[month - 1] - day; // Days remaining in the current month
+                daysDifference += daysInMonth[month - 1] - day; 
                 for (int i = month; i < otherDate.getMonth() - 1; ++i) {
-                    daysDifference += daysInMonth[i]; // Days in the months in between
+                    daysDifference += daysInMonth[i]; 
                 }
-                daysDifference += otherDate.getDay(); // Days passed in the final month
+                daysDifference += otherDate.getDay(); 
             }
         } else {
-            // Different years
-            // Days remaining in the current year
             daysDifference += daysInMonth[month - 1] - day;
             for (int i = month; i <= 12; ++i) {
-                daysDifference += daysInMonth[i - 1]; // Days in the months remaining in the current year
+                daysDifference += daysInMonth[i - 1]; 
             }
-            // Days in the years in between
             for (int i = year + 1; i < otherDate.getYear(); ++i) {
                 daysDifference += 365;
             }
-            // Days passed in the final year
             for (int i = 1; i < otherDate.getMonth(); ++i) {
                 daysDifference += daysInMonth[i - 1];
             }
