@@ -62,6 +62,8 @@ public:
     string* getLikedPages() {return likedPages;}
     int getCurrLikedPages() {return currLikedPages;}
 
+    //setters
+
     void addFriend(const string& friendId) {
         if (currFriends < maxFriends) {
             friends[currFriends++] = friendId;
