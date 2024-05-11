@@ -42,10 +42,7 @@ public:
     ~User() {
         delete[] friends;
         delete[] likedPages;
-        for (int i = 0; i < currPosts; ++i) {
-            delete posts[i];
-        }
-        delete[] posts;
+        
         for (int i = 0; i < currComments; ++i) {
             delete comments[i];
         }

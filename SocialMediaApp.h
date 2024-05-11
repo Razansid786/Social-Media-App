@@ -232,7 +232,7 @@ public:
                 int numPosts = friendUser->getCurrPosts(); 
 
                 if (numPosts == 0){
-                    cout<<" No posts! \n\n";
+                    cout<<"\n\t---No posts in last 24 hours!---\n";
                     continue;
                 }
 
@@ -259,6 +259,10 @@ public:
                 cout << "\nPosts from " << likedPage->getTitle() << ":" << endl;
                 Post** posts = likedPage->getPosts(); 
                 int numPosts = likedPage->getCurrPosts(); 
+                if (numPosts == 0){
+                    cout<<"\n\t---No Posts in last 24 hours!---\n";
+                    continue;
+                }
                 for (int j = 0; j < numPosts; ++j) {
                     Post* post = posts[j]; 
                     if (isPostSharedInLast24Hours(post)) {
@@ -298,7 +302,7 @@ public:
         cout << "\n\tPosts from friends shared in last 24 hours:" << endl;
         viewPostsOfFriendsInLast24Hours();
 
-        cout << "\n\tPosts from liked pages shared in last 24 hours:" << endl;
+        cout << "\n\n\tPosts from liked pages shared in last 24 hours:" << endl;
         viewPostsOfLikedPagesInLast24Hours();
     }
 
