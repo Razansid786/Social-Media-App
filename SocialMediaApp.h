@@ -47,7 +47,22 @@ public:
         initializePostsFromFile("Posts.txt");
         readCommentsFromFile("Comments.txt");
     }
-    ~SocialNetworkApp(){};
+    ~SocialNetworkApp() {
+        for (int i = 0; i < numUsers; ++i) {
+            delete users[i];
+        }
+        delete[] users;
+
+        for (int i = 0; i < numPages; ++i) {
+            delete pages[i];
+        }
+        delete[] pages;
+
+        for (int i = 0; i < numPosts; ++i) {
+            delete posts[i];
+        }
+        delete[] posts;
+    };
     //getters
     int getMaxUsers() {return maxUsers;}
     int getMaxPages() {return maxPages;}
@@ -132,7 +147,8 @@ public:
                             cout<<"Enter post ID: ";
                             cin>>i;
                             cout<<"Enter the comment: ";
-                            cin>>t;
+                            cin.ignore();
+                            getline(cin,t);
                             commentOnPost(i,t);
                             break;
                         }
@@ -148,7 +164,8 @@ public:
                             cout<<"Enter post ID: ";
                             cin>>i;
                             cout<<"Enter the memory text: ";
-                            cin>>t;
+                            cin.ignore();
+                            getline(cin,t);
                             shareMemory(i,t);
                             break;
                         }
@@ -227,7 +244,7 @@ public:
         for (int i = 0; i < numFriends; ++i) {
             User* friendUser = findUserById(friendIds[i]); 
             if (friendUser) { 
-                cout << "\nPosts from " << friendUser->getName() << ":" << endl;
+                cout << "\n\nPosts from " << friendUser->getName() << ":" << endl;
                 Post** posts = friendUser->getPosts(); 
                 int numPosts = friendUser->getCurrPosts(); 
 
@@ -256,7 +273,7 @@ public:
         for (int i = 0; i < numLikedPages; ++i) {
             Page* likedPage = findPageById(likedPageIds[i]); 
             if (likedPage) { 
-                cout << "\nPosts from " << likedPage->getTitle() << ":" << endl;
+                cout << "\n\nPosts from " << likedPage->getTitle() << ":" << endl;
                 Post** posts = likedPage->getPosts(); 
                 int numPosts = likedPage->getCurrPosts(); 
                 if (numPosts == 0){

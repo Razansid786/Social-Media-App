@@ -27,7 +27,13 @@ public:
             posts[i] = nullptr; 
         }
     }
-    ~Page(){};
+    ~Page() {
+        
+        for (int i = 0; i < currPosts; ++i) {
+            delete posts[i];
+        }
+        delete[] posts;
+    };
     // getters
     string getId() {return id;};
     string getTitle() {return title;}
