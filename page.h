@@ -39,6 +39,7 @@ public:
     string getTitle() {return title;}
     Post** getPosts() {return posts;}
     int getCurrPosts() {return currPosts;}
+    int getLikes() {return likes;}
 
     void addPost(Post* post) {
         if (currPosts < maxPosts) {
